@@ -112,11 +112,7 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
     MinecraftConnection smc = ensureMinecraftConnection();
     smc.setState(StateRegistry.PLAY);
     VelocityServerConnection existingConnection = serverConn.getPlayer().getConnectedServer();
-    if (existingConnection == null) {
-      // Strap on the play session handler
-      serverConn.getPlayer().getConnection()
-          .setSessionHandler(new ClientPlaySessionHandler(server, serverConn.getPlayer()));
-    } else {
+    if (existingConnection != null) {
       // If the server we are departing is modded, we must always reset the client's handshake.
       if (existingConnection.isLegacyForge()) {
         serverConn.getPlayer().sendLegacyForgeHandshakeResetPacket();
