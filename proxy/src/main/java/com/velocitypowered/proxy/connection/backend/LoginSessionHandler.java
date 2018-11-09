@@ -47,14 +47,6 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
     this.resultFuture = resultFuture;
   }
 
-  private MinecraftConnection ensureMinecraftConnection() {
-    MinecraftConnection mc = serverConn.getConnection();
-    if (mc == null) {
-      throw new IllegalStateException("Not connected to backend server!");
-    }
-    return mc;
-  }
-
   @Override
   public boolean handle(EncryptionRequest packet) {
     throw new IllegalStateException("Backend server is online-mode!");
@@ -62,7 +54,6 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
 
   @Override
   public boolean handle(LoginPluginMessage packet) {
-    MinecraftConnection mc = ensureMinecraftConnection();
     VelocityConfiguration configuration = server.getConfiguration();
     if (configuration.getPlayerInfoForwardingMode() == PlayerInfoForwarding.MODERN && packet
         .getChannel()
@@ -73,7 +64,7 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
       response.setData(createForwardingData(configuration.getForwardingSecret(),
           serverConn.getPlayer().getRemoteAddress().getHostString(),
           serverConn.getPlayer().getProfile()));
-      mc.write(response);
+      serverConn.getConnection().write(response);
       informationForwarded = true;
     } else {
       // Don't understand
@@ -81,7 +72,7 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
       response.setSuccess(false);
       response.setId(packet.getId());
       response.setData(Unpooled.EMPTY_BUFFER);
-      mc.write(response);
+      serverConn.getConnection().write(response);
     }
     return true;
   }
@@ -95,7 +86,7 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
 
   @Override
   public boolean handle(SetCompression packet) {
-    ensureMinecraftConnection().setCompressionThreshold(packet.getThreshold());
+    serverConn.getConnection().setCompressionThreshold(packet.getThreshold());
     return true;
   }
 
@@ -109,7 +100,7 @@ public class LoginSessionHandler implements MinecraftSessionHandler {
     }
 
     // The player has been logged on to the backend server.
-    MinecraftConnection smc = ensureMinecraftConnection();
+    MinecraftConnection smc = serverConn.getConnection();
     smc.setState(StateRegistry.PLAY);
     VelocityServerConnection existingConnection = serverConn.getPlayer().getConnectedServer();
     if (existingConnection != null) {

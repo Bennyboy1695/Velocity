@@ -165,12 +165,8 @@ public class BackendPlaySessionHandler implements MinecraftSessionHandler {
   }
 
   private boolean canForwardPluginMessage(PluginMessage message) {
-    MinecraftConnection mc = serverConn.getConnection();
-    if (mc == null) {
-      return false;
-    }
     boolean minecraftOrFmlMessage;
-    if (mc.getProtocolVersion() <= ProtocolConstants.MINECRAFT_1_12_2) {
+    if (serverConn.getConnection().getProtocolVersion() <= ProtocolConstants.MINECRAFT_1_12_2) {
       String channel = message.getChannel();
       minecraftOrFmlMessage = channel.startsWith("MC|") || channel
           .startsWith(ForgeConstants.FORGE_LEGACY_HANDSHAKE_CHANNEL);

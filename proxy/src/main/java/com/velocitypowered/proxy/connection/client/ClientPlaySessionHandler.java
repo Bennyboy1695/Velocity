@@ -75,12 +75,9 @@ public class ClientPlaySessionHandler implements MinecraftSessionHandler {
   public boolean handle(KeepAlive packet) {
     VelocityServerConnection serverConnection = player.getConnectedServer();
     if (serverConnection != null && packet.getRandomId() == serverConnection.getLastPingId()) {
-      MinecraftConnection smc = serverConnection.getConnection();
-      if (smc != null) {
-        player.setPing(System.currentTimeMillis() - serverConnection.getLastPingSent());
-        smc.write(packet);
-        serverConnection.resetLastPingId();
-      }
+      player.setPing(System.currentTimeMillis() - serverConnection.getLastPingSent());
+      serverConnection.getConnection().write(packet);
+      serverConnection.resetLastPingId();
     }
     return true;
   }
@@ -95,10 +92,6 @@ public class ClientPlaySessionHandler implements MinecraftSessionHandler {
   public boolean handle(Chat packet) {
     VelocityServerConnection serverConnection = player.getConnectedServer();
     if (serverConnection == null) {
-      return true;
-    }
-    MinecraftConnection smc = serverConnection.getConnection();
-    if (smc == null) {
       return true;
     }
 
@@ -124,12 +117,12 @@ public class ClientPlaySessionHandler implements MinecraftSessionHandler {
             if (chatResult.isAllowed()) {
               Optional<String> eventMsg = pme.getResult().getMessage();
               if (eventMsg.isPresent()) {
-                smc.write(Chat.createServerbound(eventMsg.get()));
+                serverConnection.getConnection().write(Chat.createServerbound(eventMsg.get()));
               } else {
-                smc.write(packet);
+                serverConnection.getConnection().write(packet);
               }
             }
-          }, smc.eventLoop());
+          }, serverConnection.getConnection().eventLoop());
     }
     return true;
   }

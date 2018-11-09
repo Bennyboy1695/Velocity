@@ -421,13 +421,7 @@ public class ConnectedPlayer implements MinecraftConnectionAssociation, Player {
     if (sc == null) {
       throw new IllegalStateException("No backend connection");
     }
-
-    MinecraftConnection mc = sc.getConnection();
-    if (mc == null) {
-      throw new IllegalStateException("Backend connection is not connected to a server");
-    }
-
-    return mc;
+    return sc.getConnection();
   }
 
   void teardown() {

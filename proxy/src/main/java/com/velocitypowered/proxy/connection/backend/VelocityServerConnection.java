@@ -143,8 +143,10 @@ public class VelocityServerConnection implements MinecraftConnectionAssociation,
     mc.write(new ServerLogin(proxyPlayer.getUsername()));
   }
 
-  @Nullable
   public MinecraftConnection getConnection() {
+    if (connection == null) {
+      throw new IllegalStateException("Not connected to server!");
+    }
     return connection;
   }
 
